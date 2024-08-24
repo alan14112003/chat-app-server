@@ -1,0 +1,60 @@
+version: '3.7'
+
+services:
+  mysql:
+    image: mysql:5.7
+    container_name: mysql-nodejs
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+    ports:
+      - '3308:3306'
+    volumes:
+      # Mysql
+      - db:/var/lib/mysql
+    networks:
+      - nodejss
+
+  redis:
+    image: redis
+    container_name: redis-nodejs
+    ports:
+      - '6378:6379' # Map cổng máy chủ Redis container tới cổng máy chủ host
+    volumes:
+      - redis-data:/data # Mount một thư mục dữ liệu cho Redis container
+    networks:
+      - nodejss
+
+  web:
+    depends_on:
+      - mysql
+      - redis
+    build: ./
+    ports:
+      - '8081:8081'
+    container_name: nodejs
+    networks:
+      - nodejss
+
+  ngrok:
+    image: ngrok/ngrok:alpine
+    container_name: ngrok-nodejs
+    depends_on:
+      - web
+    ports:
+      - 4040:4040 # Port của ngrok dashboard
+    expose:
+      - '4040'
+    environment:
+      NGROK_AUTHTOKEN: ${NGROK_AUTH_TOKEN}
+    command: 'http web:8081'
+    networks:
+      - nodejss
+
+volumes:
+  db:
+  redis-data:
+
+networks:
+  nodejss:
