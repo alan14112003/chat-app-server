@@ -52,9 +52,9 @@ const AuthController = {
       res.cookie('refreshToken', token.refreshToken, {
         maxAge: REFRESH_TOKEN_EXP,
       })
+
       return res.status(200).json(authResult)
     } catch (error) {
-      trx.rollback()
       next(error)
     }
   },
