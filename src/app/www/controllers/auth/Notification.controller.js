@@ -13,7 +13,7 @@ const NotificationController = {
         },
       })
 
-      return res.status(201).json(notifications)
+      return res.status(200).json(notifications)
     } catch (error) {
       next(error)
     }
@@ -36,7 +36,7 @@ const NotificationController = {
         }
       )
 
-      return res.status(201).json(updatedCount)
+      return res.status(200).json(updatedCount)
     } catch (error) {
       next(error)
     }
