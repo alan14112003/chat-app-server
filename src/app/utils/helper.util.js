@@ -8,3 +8,6 @@ export const splitArrayIntoChunks = (array, chunkSize) => {
   }
   return chunks
 }
+
+export const defaultAvatar = () =>
+  'https://res.cloudinary.com/alan1411/image/upload/v1727832285/chat_app/perxrynvqefihumkihs9.jpg'

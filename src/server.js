@@ -50,7 +50,7 @@ app.use((err, req, res, next) => {
 })
 
 // gắn nghe cho app và gán vào server
-const server = app.listen(process.env.PORT || 80, () => {
+const server = app.listen(process.env.PORT || 80, '0.0.0.0', () => {
   console.log(`Server đang chạy ở cổng ${process.env.PORT}`)
 })
 

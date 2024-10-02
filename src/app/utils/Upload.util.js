@@ -4,12 +4,10 @@ const UploadUtil = {
   uploadSingleFile: async (file, path) => {
     const uploadResponse = await CloudinaryConfig.uploader.upload(file, {
       folder: process.env.CLOUDINARY_FOLDER + path,
+      resource_type: 'auto',
     })
 
-    return {
-      url: uploadResponse.url,
-      public_id: uploadResponse.public_id,
-    }
+    return uploadResponse.public_id
   },
 
   uploadMultipleFile: async (files, path) => {

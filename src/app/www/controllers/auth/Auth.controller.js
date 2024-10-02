@@ -13,6 +13,7 @@ import UserStatusEnum from '@/app/enums/user/UserStatus.enum'
 import RequestCodeEnum from '@/app/enums/user/RequestCode.enum'
 import AuthCodeEnum from '@/app/enums/response_code/auth/AuthCode.enum'
 import StatusCodeEnum from '@/app/enums/response_code/notification/StatusCode.enum'
+import { defaultAvatar } from '@/app/utils/helper.util'
 
 const REFRESH_TOKEN_EXP = process.env.REFRESH_TOKEN_EXP
 
@@ -136,6 +137,7 @@ const AuthController = {
 
       body.password = BcryptConfig.hashPass(body.password)
       body.resetPassword = AuthUtil.generateCode()
+      body.avatar = defaultAvatar()
 
       const auth = await User.create(body, {
         transaction: trx,
