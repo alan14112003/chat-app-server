@@ -54,12 +54,12 @@ app.use((err, req, res, next) => {
 const server = app.listen(process.env.PORT || 80, '0.0.0.0', async () => {
   console.log(`Server đang chạy ở cổng ${process.env.PORT}`)
 
-  ngrokUrl = await ngrok.connect({
+  const ngrokUrl = await ngrok.connect({
     authtoken: process.env.NGROK_TOKEN,
     port: process.env.PORT || 80,
   })
 
-  console.log(`Server public url is: ${ngrokUrl}`)
+  console.log(`Server public url is: ${ngrokUrl.url()}`)
 })
 
 // mô tả các mối quan hệ
