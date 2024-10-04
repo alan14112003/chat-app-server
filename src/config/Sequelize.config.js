@@ -19,6 +19,10 @@ const SequelizeConfig = new Sequelize(
       charset: 'utf8',
       collate: 'utf8_general_ci',
     },
+    dialectOptions: {
+      timezone: '+07:00', // Đặt múi giờ Việt Nam
+    },
+    timezone: '+07:00', // Cách khác để thiết lập múi giờ GMT+7
   }
 )
 

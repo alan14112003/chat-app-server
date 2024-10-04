@@ -9,6 +9,7 @@ import initSocket from './events'
 import initRelationship from './app/models'
 import initCron from './cron'
 import StatusCodeEnum from './app/enums/response_code/notification/StatusCode.enum'
+import ngrok from '@ngrok/ngrok'
 
 // Cấu hình dotenv
 configDotenv()
@@ -50,8 +51,15 @@ app.use((err, req, res, next) => {
 })
 
 // gắn nghe cho app và gán vào server
-const server = app.listen(process.env.PORT || 80, '0.0.0.0', () => {
+const server = app.listen(process.env.PORT || 80, '0.0.0.0', async () => {
   console.log(`Server đang chạy ở cổng ${process.env.PORT}`)
+
+  ngrokUrl = await ngrok.connect({
+    authtoken: process.env.NGROK_TOKEN,
+    port: process.env.PORT || 80,
+  })
+
+  console.log(`Server public url is: ${ngrokUrl}`)
 })
 
 // mô tả các mối quan hệ
