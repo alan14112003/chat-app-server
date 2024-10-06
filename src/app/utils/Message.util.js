@@ -12,7 +12,7 @@ import Emoji from '../models/Emoji.model'
  *
  * @returns { import("sequelize").Includeable[]} include options
  */
-const includeOnMessage = () => [
+const includeOnMessage = (userId) => [
   {
     model: User,
     as: 'sender',
@@ -21,6 +21,17 @@ const includeOnMessage = () => [
   {
     model: Message,
     as: 'reply',
+    required: false,
+    where: {
+      id: {
+        [Op.notIn]: Sequelize.literal(`(
+                SELECT MessageDeleted.messageId
+                FROM MessageDeleteds as MessageDeleted 
+                WHERE chatId = Message.chatId
+                and userId = '${userId}'
+              )`),
+      },
+    },
     include: [
       {
         model: User,
@@ -64,7 +75,7 @@ const MessageUtil = {
     }
 
     const messages = await Message.findAll({
-      include: [...includeOnMessage()],
+      include: [...includeOnMessage(userId)],
       where: {
         chatId: chatId,
         [Op.and]: [
@@ -114,7 +125,7 @@ const MessageUtil = {
   },
   getMessage: async (messageId, userId) => {
     const message = await Message.findOne({
-      include: [...includeOnMessage()],
+      include: [...includeOnMessage(userId)],
       where: {
         [Op.and]: [
           {
