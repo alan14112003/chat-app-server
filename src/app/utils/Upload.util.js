@@ -7,7 +7,7 @@ const UploadUtil = {
       resource_type: 'auto',
     })
 
-    return uploadResponse.public_id
+    return uploadResponse.url
   },
 
   uploadMultipleFile: async (files, path) => {

@@ -22,7 +22,7 @@ const UploadController = {
       }
 
       const fileResponse = await UploadUtil.uploadSingleFile(file.path, path)
-      return res.status(200).json(fileResponse)
+      return res.status(200).json({ url: fileResponse })
     } catch (error) {
       console.log(error)
       next(error)
