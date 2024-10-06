@@ -16,8 +16,8 @@ MessageRouter.post(
 
 MessageRouter.put('/:messageId/pin', MessageController.handlePin)
 
-MessageRouter.put('/:messageId/delete', MessageController.delete)
+MessageRouter.delete('/:messageId/delete', MessageController.delete)
 
-MessageRouter.put('/:messageId/recall', MessageController.recall)
+MessageRouter.delete('/:messageId/recall', MessageController.recall)
 
 export default MessageRouter
