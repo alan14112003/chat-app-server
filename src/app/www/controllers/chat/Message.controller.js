@@ -89,12 +89,7 @@ const MessageController = {
         }
       )
 
-      MessageUtil.pushNotifyMessage(
-        auth.id,
-        chatId,
-        MessageEvent.NEW,
-        message.id
-      )
+      MessageUtil.pushNotifyMessage(auth.id, chatId, MessageEvent.NEW, message)
 
       await transaction.commit()
       return res.status(200).json(message)
@@ -134,7 +129,12 @@ const MessageController = {
         }
       )
 
-      MessageUtil.pushNotifyMessage(auth.id, message.chatId, MessageEvent.PIN)
+      MessageUtil.pushNotifyMessage(
+        auth.id,
+        message.chatId,
+        MessageEvent.PIN,
+        message
+      )
 
       await transaction.commit()
       return res.status(200).json(messageNew)
@@ -187,7 +187,7 @@ const MessageController = {
         auth.id,
         message.chatId,
         MessageEvent.REACTION,
-        message.id
+        message
       )
 
       await transaction.commit()
@@ -256,7 +256,7 @@ const MessageController = {
         message.chatId,
         MessageEvent.RECALL,
         message.chatId,
-        message.id
+        message
       )
 
       await transaction.commit()
