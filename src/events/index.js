@@ -15,6 +15,11 @@ const initSocket = (server) => {
       console.log(`join room: "${room}", ${typeof room}`)
       socket.join(room) // phải có cái này (không được xóa nó)
     })
+
+    socket.on('leave', (room) => {
+      console.log(`leave room: "${room}", ${typeof room}`)
+      socket.leave(room) // phải có cái này (không được xóa nó)
+    })
   })
 
   // bắn sự kiện đến một user nào đó từ server
