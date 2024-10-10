@@ -93,7 +93,7 @@ const MessageUtil = {
         ],
       },
       order: [['id', 'DESC']],
-      limit: limit,
+      limit: Number(limit),
     })
 
     return messages
