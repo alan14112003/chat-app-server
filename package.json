@@ -18,7 +18,6 @@
   "author": "alan",
   "license": "ISC",
   "dependencies": {
-    "@ngrok/ngrok": "^1.4.1",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.2",
     "cloudinary": "^2.0.1",
