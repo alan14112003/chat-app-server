@@ -85,6 +85,7 @@ const ChatUtil = {
             `),
         },
       },
+      order: [['updatedAt', 'DESC']]
     })
 
     return chats
