@@ -255,7 +255,6 @@ const MessageController = {
         auth.id,
         message.chatId,
         MessageEvent.RECALL,
-        message.chatId,
         message
       )
 
