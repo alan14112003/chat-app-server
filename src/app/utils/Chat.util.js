@@ -73,6 +73,17 @@ const ChatUtil = {
           model: Message,
           as: 'lastMsg',
           // xử lý thêm
+          required: false,
+          where: {
+            id: {
+              [Op.notIn]: Sequelize.literal(`(
+                SELECT MessageDeleted.messageId
+                FROM MessageDeleteds as MessageDeleted 
+                WHERE chatId = Message.chatId
+                and userId = '${userId}'
+              )`),
+            },
+          },
         },
         ...includeMemberAndAdminChat(),
       ],
