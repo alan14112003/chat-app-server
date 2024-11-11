@@ -79,7 +79,7 @@ const ChatUtil = {
               [Op.notIn]: Sequelize.literal(`(
                 SELECT MessageDeleted.messageId
                 FROM MessageDeleteds as MessageDeleted 
-                WHERE chatId = Message.chatId
+                WHERE chatId = lastMsg.chatId
                 and userId = '${userId}'
               )`),
             },
