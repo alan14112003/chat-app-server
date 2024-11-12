@@ -72,6 +72,13 @@ const ChatUtil = {
         {
           model: Message,
           as: 'lastMsg',
+          include: [
+            {
+              model: User,
+              as: 'sender',
+              attributes: [...UserUtil.getPublicInfoAttribute()],
+            },
+          ],
           // xử lý thêm
           required: false,
           where: {
