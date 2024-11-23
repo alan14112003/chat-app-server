@@ -32,6 +32,10 @@ const Message = SequelizeConfig.define(
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
+    isChatBotContent: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    }
   },
   {
     timestamps: true,

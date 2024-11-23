@@ -60,7 +60,7 @@ const MessageController = {
     try {
       const auth = req.user
       const chatId = req.params.chatId
-      const { text, file, image, type, replyId } = req.body
+      const { text, file, image, type, replyId, isChatBotContent } = req.body
 
       const message = await Message.create(
         {
@@ -71,6 +71,7 @@ const MessageController = {
           image,
           type,
           replyId,
+          isChatBotContent,
         },
         {
           transaction: transaction,
@@ -92,6 +93,12 @@ const MessageController = {
       MessageUtil.pushNotifyMessage(auth.id, chatId, MessageEvent.NEW, message)
 
       await transaction.commit()
+
+      // nếu là câu hỏi dành cho chat bot thì thực hiện bât dồng bộ trả lời câu hỏi
+      if (isChatBotContent) {
+        MessageUtil.createChatBotAnswer(message)
+      }
+
       return res.status(200).json(message)
     } catch (error) {
       await transaction.rollback()
@@ -121,7 +128,7 @@ const MessageController = {
         {
           userId: auth.id,
           chatId: message.chatId,
-          text: `đã ${isPinned ? 'ghim' : 'bỏ ghim'} 1 tin nhắn`,
+          text: `${auth.fullName} đã ${isPinned ? 'ghim' : 'bỏ ghim'} 1 tin nhắn`,
           type: MessageTypeEnum.SYSTEM,
         },
         {

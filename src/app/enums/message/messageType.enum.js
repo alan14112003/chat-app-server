@@ -3,6 +3,7 @@ class MessageTypeEnum {
   static IMAGE = 1
   static FILE = 2
   static SYSTEM = 100
+  static CHAT_BOT = 50
 
   static allName() {
     return {
@@ -10,6 +11,7 @@ class MessageTypeEnum {
       [this.IMAGE]: 'hình ảnh',
       [this.FILE]: 'tệp tin',
       [this.SYSTEM]: 'hệ thống',
+      [this.CHAT_BOT]: 'chat bot',
     }
   }
 
