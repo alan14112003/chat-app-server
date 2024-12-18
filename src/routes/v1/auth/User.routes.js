@@ -4,5 +4,6 @@ import express from 'express'
 const UserRouter = express.Router()
 
 UserRouter.get('/', UserController.findByEmail)
+UserRouter.get('/:id', UserController.getById)
 
 export default UserRouter

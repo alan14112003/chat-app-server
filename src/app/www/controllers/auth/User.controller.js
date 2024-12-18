@@ -74,6 +74,29 @@ const UserController = {
       next(error)
     }
   },
+
+  getById: async (req, res, next) => {
+    try {
+      const id = req.params.id
+      const auth = req.user
+
+      if (!id || id.trim() === '') {
+        return res.status(400).json({
+          message: 'id không được để trống',
+        })
+      }
+
+      // Lấy thông tin người dùng
+      const user = await User.findByPk(id, {
+        attributes: UserUtil.getPublicInfoAttribute(),
+      })
+
+
+      return res.json(user)
+    } catch (error) {
+      next(error)
+    }
+  },
 }
 
 export default UserController
