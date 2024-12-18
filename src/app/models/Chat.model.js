@@ -20,6 +20,13 @@ const Chat = SequelizeConfig.define('Chat', {
   isGroup: {
     type: DataTypes.BOOLEAN,
   },
+  videoCallState: {
+    type: DataTypes.TINYINT,
+  },
+  videoCallPersonCount: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
+  },
 })
 
 export default Chat

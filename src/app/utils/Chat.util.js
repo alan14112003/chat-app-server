@@ -126,9 +126,9 @@ const ChatUtil = {
     })
   },
 
-  pushNotifyToChat: async (members, chatId, event) => {
+  pushNotifyToChat: async (members, chatId, event, ...data) => {
     members.forEach((member) => {
-      EmitEvent.emit(member, event, chatId)
+      EmitEvent.emit(member, event, chatId, ...data)
     })
   },
 }

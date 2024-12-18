@@ -55,6 +55,9 @@ ChatRouter.post('/:chatId/seen', ChatController.seen)
 
 // messages
 ChatRouter.get('/:chatId/messages', MessageController.all)
+ChatRouter.post('/:chatId/video-call/join', ChatController.joinVideoCall)
+ChatRouter.post('/:chatId/video-call/refuse', ChatController.refuseVideoCall)
+ChatRouter.post('/:chatId/video-call/close', ChatController.closeVideoCall)
 
 ChatRouter.post('/:chatId/messages', MessageController.create)
 

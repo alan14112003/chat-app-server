@@ -1,3 +1,4 @@
+import VideoCallStateEnum from '@/app/enums/chat/videoCallState.enum'
 import MessageTypeEnum from '@/app/enums/message/messageType.enum'
 import AuthCodeEnum from '@/app/enums/response_code/auth/AuthCode.enum'
 import ChatCodeEnum from '@/app/enums/response_code/chat/ChatCode.enum'
@@ -11,6 +12,20 @@ import ChatUtil from '@/app/utils/Chat.util'
 import SequelizeConfig from '@/config/Sequelize.config'
 import ChatEvent from '@/events/Chat.event'
 import { Op } from 'sequelize'
+import cron from 'node-cron'
+
+function stopTask(req, chatId, auth, checkAuth = false) {
+  // stop task
+  if (!req.app.tasks) {
+    req.app.tasks = {}
+  }
+
+  const task = req.app.tasks[chatId]
+
+  if (task && (!checkAuth || auth.id == task.creator)) {
+    task.task.stop()
+  }
+}
 
 const ChatController = {
   all: async (req, res, next) => {
@@ -513,6 +528,208 @@ const ChatController = {
       })
     } catch (error) {
       await transaction.rollback()
+      next(error)
+    }
+  },
+
+  joinVideoCall: async (req, res, next) => {
+    try {
+      const auth = req.user
+      const chatId = req.params.chatId
+
+      const chat = await Chat.findByPk(chatId)
+
+      if (!chat) {
+        return res.status(404).json({
+          code: StatusCodeEnum.notFound,
+          message: 'đoạn chat không tồn tại',
+        })
+      }
+
+      const getChatUsers = async () => {
+        const ChatUsers = await ChatUser.findAll({
+          where: { chatId, userId: { [Op.ne]: auth.id } },
+          attributes: ['userId'],
+        });
+        return ChatUsers.map((chatUser) => chatUser.userId);
+      };
+
+      // update person cout
+      await chat.update({ videoCallPersonCount: chat.videoCallPersonCount + 1 });
+
+      switch (chat.videoCallState) {
+        case null: {
+          // Chuyển sang trạng thái yêu cầu
+          await chat.update({ videoCallState: VideoCallStateEnum.REQUEST });
+
+          const userReceives = await getChatUsers();
+          const data = {
+            isGroup: chat.isGroup,
+            sender: auth.fullName,
+            groupName: chat.isGroup ? chat.groupName : '',
+          };
+
+          // Gửi yêu cầu video call đến những người khác
+          ChatUtil.pushNotifyToChat(userReceives, chatId, ChatEvent.VIDEO_CALL_REQUEST, data);
+
+          // Tạo cronjob kiểm tra trạng thái sau 30 giây
+          const task = cron.schedule('*/30 * * * * *', async () => {
+            console.log('Kiểm tra tắt cuộc gọi sau 30 giây.');
+            const updatedChat = await Chat.findByPk(chatId);
+
+            if (updatedChat.videoCallState === VideoCallStateEnum.REQUEST) {
+              await updatedChat.update({ videoCallState: null, videoCallPersonCount: 0, });
+
+              // Gửi yêu cầu dừng cuộc gọi
+              ChatUtil.pushNotifyToChat([auth.id], chatId, ChatEvent.VIDEO_CALL_TERMINATE);
+            }
+
+            // Dừng và xóa cronjob
+            task.stop();
+          });
+
+          if (!req.app.tasks) {
+            req.app.tasks = {}
+          }
+
+          req.app.tasks[chatId] = { creator: auth.id, task }
+
+          return res.status(200).json({
+            videoCallState: VideoCallStateEnum.REQUEST
+          });
+        }
+
+        case VideoCallStateEnum.REQUEST: {
+          // Chuyển trạng thái sang CONNECT
+          await chat.update({ videoCallState: VideoCallStateEnum.CONNECT });
+
+          const userReceives = await getChatUsers();
+          ChatUtil.pushNotifyToChat(userReceives, chatId, ChatEvent.VIDEO_CALL_JOIN, auth.fullName);
+
+          stopTask(req, chatId, auth)
+
+          return res.status(200).json({
+            videoCallState: VideoCallStateEnum.CONNECT
+          });
+        }
+
+        default:
+          const userReceives = await getChatUsers();
+          ChatUtil.pushNotifyToChat(userReceives, chatId, ChatEvent.VIDEO_CALL_JOIN, auth.fullName);
+
+          return res.status(200).json({
+            videoCallState: VideoCallStateEnum.CONNECT
+          });
+      }
+
+    } catch (error) {
+      next(error)
+    }
+  },
+
+  refuseVideoCall: async (req, res, next) => {
+    try {
+      const auth = req.user
+      const chatId = req.params.chatId
+
+      const chat = await Chat.findByPk(chatId)
+
+      if (!chat) {
+        return res.status(404).json({
+          code: StatusCodeEnum.notFound,
+          message: 'đoạn chat không tồn tại',
+        })
+      }
+
+      // get list members
+      const ChatUsers = await ChatUser.findAll({
+        where: {
+          chatId: chatId,
+          userId: {
+            [Op.ne]: auth.id,
+          },
+        },
+        attributes: ['userId'],
+      })
+
+      const userReceives = ChatUsers.map((chatUser) => chatUser.userId)
+
+      if (!chat.isGroup) {
+        await chat.update({
+          videoCallState: null,
+        })
+      }
+
+      const data = {
+        sender: auth.fullName,
+        isGroup: chat.isGroup,
+      }
+
+      ChatUtil.pushNotifyToChat(userReceives, chatId, ChatEvent.VIDEO_CALL_REFUSE, data)
+
+      return res.status(200).json({
+        code: StatusCodeEnum.success,
+        message: 'thành công',
+      })
+    } catch (error) {
+      next(error)
+    }
+  },
+
+  closeVideoCall: async (req, res, next) => {
+    try {
+      const auth = req.user
+      const chatId = req.params.chatId
+
+      const chat = await Chat.findByPk(chatId)
+
+      if (!chat) {
+        return res.status(404).json({
+          code: StatusCodeEnum.notFound,
+          message: 'đoạn chat không tồn tại',
+        })
+      }
+
+      // get list members
+      const ChatUsers = await ChatUser.findAll({
+        where: {
+          chatId: chatId,
+          userId: {
+            [Op.ne]: auth.id,
+          },
+        },
+        attributes: ['userId'],
+      })
+
+      const userReceives = ChatUsers.map((chatUser) => chatUser.userId)
+
+      let videoCallState = chat.videoCallState;
+      const newPersonCount = chat.videoCallPersonCount - 1
+
+      if (newPersonCount < 2) {
+        videoCallState = null;
+      }
+
+      await chat.update({
+        videoCallState: videoCallState,
+        videoCallPersonCount: newPersonCount,
+      })
+
+      const data = {
+        videoCallPersonCount: newPersonCount,
+        sender: auth.fullName,
+      }
+
+      ChatUtil.pushNotifyToChat(userReceives, chatId, ChatEvent.VIDEO_CALL_CLOSE, data)
+
+      // stop task
+      stopTask(req, chatId, auth, true)
+
+      return res.status(200).json({
+        code: StatusCodeEnum.success,
+        message: 'thành công',
+      })
+    } catch (error) {
       next(error)
     }
   },
