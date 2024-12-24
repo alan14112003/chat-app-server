@@ -704,7 +704,7 @@ const ChatController = {
       const userReceives = ChatUsers.map((chatUser) => chatUser.userId)
 
       let videoCallState = chat.videoCallState;
-      const newPersonCount = chat.videoCallPersonCount - 1
+      const newPersonCount = chat.videoCallPersonCount > 0 ? chat.videoCallPersonCount - 1 : 0
 
       if (newPersonCount < 2) {
         videoCallState = null;
